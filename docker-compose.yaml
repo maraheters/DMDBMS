@@ -1,0 +1,23 @@
+services:
+  postgres_car_marketplace:
+    image: postgres:18.0-alpine3.22
+    environment:
+      POSTGRES_DB: marketplace_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - pgdata_car_marketplace:/var/lib/postgresql/data
+    ports:
+      - "5444:5432"
+    restart: always
+
+  flyway_car_marketplace:
+    image: flyway/flyway
+    command: -url=jdbc:postgresql://postgres_car_marketplace:5432/marketplace_db -user=admin -password=admin migrate
+    volumes:
+      - ./db/migrations:/flyway/sql
+    depends_on:
+      - postgres_car_marketplace
+
+volumes:
+  pgdata_car_marketplace:

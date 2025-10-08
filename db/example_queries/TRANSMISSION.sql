@@ -1,0 +1,21 @@
+-- Create
+INSERT INTO TRANSMISSION (type, gears_num)
+VALUES ('CVT', 1)
+RETURNING *;
+
+-- Read (by id)
+SELECT * FROM TRANSMISSION WHERE id = 1;
+
+-- Read (all)
+SELECT * FROM TRANSMISSION ORDER BY id;
+
+-- Update
+UPDATE TRANSMISSION
+SET gears_num = 7
+WHERE id = 1
+RETURNING *;
+
+-- Delete
+DELETE FROM TRANSMISSION WHERE id = 1;
+
+
