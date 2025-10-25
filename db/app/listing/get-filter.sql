@@ -1,24 +1,72 @@
 SELECT
     L.id,
     L.title,
+    L.description,
+    L.mileage,
     L.price,
-    M.id AS modification_id,
-    M.name AS modification_name,
-    MF.name AS manufacturer_name,
-    B.type AS body_type,
-    CM.name AS model_name
+    L.user_id,
+    L.created_at,
+    jsonb_build_object(
+        'id', M.id,
+        'name', M.name,
+        'body', jsonb_build_object(
+            'id', B.id,
+            'type', B.type
+        ),
+        'engine', jsonb_build_object(
+            'id', E.id,
+            'type', E.type,
+            'configuration', E.configuration,
+            'power_kw', E.power_kw,
+            'torque_nm', E.torque_nm,
+            'displacement', E.displacement
+        ),
+        'transmission', jsonb_build_object(
+            'id', T.id,
+            'type', T.type,
+            'gears_num', T.gears_num
+        ),
+        'generation', jsonb_build_object(
+            'id', G.id,
+            'name', G.name
+        ),
+        'car_model', jsonb_build_object(
+            'id', CM.id,
+            'name', CM.name
+        ),
+        'manufacturer', jsonb_build_object(
+            'id', MF.id,
+            'name', MF.name
+        )
+    ) AS modification,
+    COALESCE(
+        jsonb_agg(
+            jsonb_build_object(
+                'id', I.id,
+                'url', I.url,
+                'order', I.order
+            )
+        ) FILTER (WHERE I.id IS NOT NULL),
+    '[]'::jsonb
+  ) AS images
 FROM
-    LISTING AS L
+    listing AS L
 LEFT JOIN
-    MODIFICATION AS M ON L.modification_id = M.id
+    image AS I ON L.id = I.listing_id
 LEFT JOIN
-    BODY AS B ON M.body_id = B.id
+    modification AS M ON L.modification_id = M.id
 LEFT JOIN
-    GENERATION AS G ON M.generation_id = G.id
+    engine AS E ON M.engine_id = E.id
 LEFT JOIN
-    CAR_MODEL AS CM ON G.car_model_id = CM.id
+    transmission AS T ON M.transmission_id = T.id
 LEFT JOIN
-    MANUFACTURER AS MF ON CM.manufacturer_id = MF.id
+    body AS B ON M.body_id = B.id
+LEFT JOIN
+    generation AS G ON M.generation_id = G.id
+LEFT JOIN
+    car_model AS CM ON G.car_model_id = CM.id
+LEFT JOIN
+    manufacturer AS MF ON CM.manufacturer_id = MF.id
 WHERE
     -- Фильтр по производителю
     (MF.id = $1 OR $1 IS NULL)
@@ -45,4 +93,6 @@ AND
     (L.mileage >= $8 OR $8 IS NULL)
 AND
     -- Фильтр по максимальному пробегу
-    (L.mileage <= $9 OR $9 IS NULL);
+    (L.mileage <= $9 OR $9 IS NULL)
+GROUP BY
+  L.id, M.id, B.id, G.id, CM.id, MF.id, E.id, T.id;

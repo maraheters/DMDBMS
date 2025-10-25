@@ -1,4 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,17 +13,16 @@ import { getAllByCarModel as getGenerationsByModel } from '@/lib/queries/generat
 import { getAllByGeneration as getModificationsByGeneration } from '@/lib/queries/modification.queries';
 import { Manufacturer, CarModel, Generation, Modification } from '@/types';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import z from 'zod';
 
 const schema = z.object({
   minPrice: z.string().optional(),
   maxPrice: z.string().optional(),
   minMileage: z.string().optional(),
   maxMileage: z.string().optional(),
-  manufacturerId: z.number().optional(),
-  carModelId: z.number().optional(),
-  generationId: z.number().optional(),
-  modificationId: z.number().optional(),
+  manufacturerId: z.number().nullable().optional(),
+  carModelId: z.number().nullable().optional(),
+  generationId: z.number().nullable().optional(),
+  modificationId: z.number().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -29,163 +31,106 @@ export default function ListingFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  // Listing-specific filters
-  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
-  const [minMileage, setMinMileage] = useState(searchParams.get('minMileage') || '');
-  const [maxMileage, setMaxMileage] = useState(searchParams.get('maxMileage') || '');
 
-  // Catalog-specific filters
+  const initialValues: FormValues = {
+    minPrice: searchParams.get('minPrice') ?? '',
+    maxPrice: searchParams.get('maxPrice') ?? '',
+    minMileage: searchParams.get('minMileage') ?? '',
+    maxMileage: searchParams.get('maxMileage') ?? '',
+    manufacturerId: searchParams.get('manufacturerId') ? Number(searchParams.get('manufacturerId')) : null,
+    carModelId: searchParams.get('carModelId') ? Number(searchParams.get('carModelId')) : null,
+    generationId: searchParams.get('generationId') ? Number(searchParams.get('generationId')) : null,
+    modificationId: searchParams.get('modificationId') ? Number(searchParams.get('modificationId')) : null,
+  };
+
+  const { register, handleSubmit, watch, setValue, reset, getValues } = useForm<FormValues>({
+    resolver: zodResolver(schema) as any,
+    defaultValues: initialValues,
+  });
+
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [models, setModels] = useState<CarModel[]>([]);
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [modifications, setModifications] = useState<Modification[]>([]);
 
-  const [selectedManufacturer, setSelectedManufacturer] = useState(searchParams.get('manufacturerId') || '');
-  const [selectedModel, setSelectedModel] = useState(searchParams.get('carModelId') || '');
-  const [selectedGeneration, setSelectedGeneration] = useState(searchParams.get('generationId') || '');
-  const [selectedModification, setSelectedModification] = useState(searchParams.get('modificationId') || '');
+  const watchedManufacturer = watch('manufacturerId');
+  const watchedModel = watch('carModelId');
+  const watchedGeneration = watch('generationId');
 
-  // Load manufacturers on mount
   useEffect(() => {
-    const loadManufacturers = async () => {
+    let mounted = true;
+    (async () => {
       try {
         const data = await getAllManufacturers();
+        if (!mounted) return;
         setManufacturers(data);
-      } catch (error) {
-        console.error('Failed to load manufacturers:', error);
+      } catch (err) {
+        console.error(err);
       }
+    })();
+    return () => {
+      mounted = false;
     };
-    loadManufacturers();
   }, []);
 
-  // Load models when manufacturer is selected
   useEffect(() => {
-    const loadModels = async () => {
-      if (!selectedManufacturer) {
-        setModels([]);
-        setSelectedModel('');
-        setSelectedGeneration('');
-        setSelectedModification('');
-        return;
-      }
-      try {
-        // Only fetch if manufacturerId is a valid number
-        const manufacturerId = parseInt(selectedManufacturer);
-        if (isNaN(manufacturerId)) return;
+    setModels([]);
+    setGenerations([]);
+    setModifications([]);
+    setValue('carModelId', null);
+    setValue('generationId', null);
+    setValue('modificationId', null);
 
-        const data = await getModelsByManufacturer(manufacturerId);
-        setModels(data);
+    if (!watchedManufacturer) return;
+    getModelsByManufacturer(watchedManufacturer).then(setModels).catch(console.error);
+  }, [watchedManufacturer, setValue]);
 
-        // If the current selectedModel is not in the new list, clear it
-        if (selectedModel && !data.some((m) => m.id.toString() === selectedModel)) {
-          setSelectedModel('');
-          setSelectedGeneration('');
-          setSelectedModification('');
-        }
-      } catch (error) {
-        console.error('Failed to load models:', error);
-      }
-    };
-    loadModels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedManufacturer]);
-
-  // Load generations when model is selected
   useEffect(() => {
-    const loadGenerations = async () => {
-      if (!selectedModel) {
-        setGenerations([]);
-        setSelectedGeneration('');
-        setSelectedModification('');
-        return;
-      }
-      try {
-        const modelId = parseInt(selectedModel);
-        if (isNaN(modelId)) return;
+    setGenerations([]);
+    setModifications([]);
+    setValue('generationId', null);
+    setValue('modificationId', null);
 
-        const data = await getGenerationsByModel(modelId);
-        setGenerations(data);
+    if (!watchedModel) return;
+    getGenerationsByModel(watchedModel).then(setGenerations).catch(console.error);
+  }, [watchedModel, setValue]);
 
-        // If the current selectedGeneration is not in the new list, clear it
-        if (selectedGeneration && !data.some((g) => g.id.toString() === selectedGeneration)) {
-          setSelectedGeneration('');
-          setSelectedModification('');
-        }
-      } catch (error) {
-        console.error('Failed to load generations:', error);
-      }
-    };
-    loadGenerations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedModel]);
-
-  // Load modifications when generation is selected
   useEffect(() => {
-    const loadModifications = async () => {
-      if (!selectedGeneration) {
-        setModifications([]);
-        setSelectedModification('');
-        return;
-      }
-      try {
-        // getModificationsByGeneration expects string ID based on original code
-        const data = await getModificationsByGeneration(parseInt(selectedGeneration));
-        setModifications(data);
+    setModifications([]);
+    setValue('modificationId', null);
 
-        // If the current selectedModification is not in the new list, clear it
-        if (selectedModification && !data.some((m) => m.id.toString() === selectedModification)) {
-          setSelectedModification('');
-        }
-      } catch (error) {
-        console.error('Failed to load modifications:', error);
-      }
-    };
-    loadModifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGeneration]);
+    if (!watchedGeneration) return;
+    getModificationsByGeneration(watchedGeneration).then(setModifications).catch(console.error);
+  }, [watchedGeneration, setValue]);
 
-  const handleApplyFilters = () => {
-    // Create params object from *current* searchParams to preserve other params
-    const params = new URLSearchParams(searchParams.toString());
+  const onFind = (values: FormValues) => {
+    const params = new URLSearchParams();
+    if (values.minPrice) params.set('minPrice', values.minPrice);
+    if (values.maxPrice) params.set('maxPrice', values.maxPrice);
+    if (values.minMileage) params.set('minMileage', values.minMileage);
+    if (values.maxMileage) params.set('maxMileage', values.maxMileage);
+    if (values.manufacturerId) params.set('manufacturerId', String(values.manufacturerId));
+    if (values.carModelId) params.set('carModelId', String(values.carModelId));
+    if (values.generationId) params.set('generationId', String(values.generationId));
+    if (values.modificationId) params.set('modificationId', String(values.modificationId));
 
-    // Helper to set or delete param if value is empty
-    const setOrDeleteParam = (key: string, value: string) => {
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    };
-
-    // Add/Remove listing-specific filters
-    setOrDeleteParam('minPrice', minPrice);
-    setOrDeleteParam('maxPrice', maxPrice);
-    setOrDeleteParam('minMileage', minMileage);
-    setOrDeleteParam('maxMileage', maxMileage);
-
-    // Add/Remove catalog-specific filters
-    setOrDeleteParam('manufacturerId', selectedManufacturer);
-    setOrDeleteParam('carModelId', selectedModel);
-    setOrDeleteParam('generationId', selectedGeneration);
-    setOrDeleteParam('modificationId', selectedModification);
-
-    // Update URL with new params using router.push
-    router.push(`${pathname}?${params.toString()}`);
+    const newQuery = params.toString();
+    if (newQuery !== searchParams.toString()) {
+      router.push(newQuery ? `${pathname}?${newQuery}` : pathname);
+    }
   };
 
-  const handleClearFilters = () => {
-    // Clear all local state
-    setMinPrice('');
-    setMaxPrice('');
-    setMinMileage('');
-    setMaxMileage('');
-    setSelectedManufacturer('');
-    setSelectedModel('');
-    setSelectedGeneration('');
-    setSelectedModification('');
-
-    // Navigate to the base pathname without any search params
+  const handleClear = () => {
+    reset({
+      minPrice: '',
+      maxPrice: '',
+      minMileage: '',
+      maxMileage: '',
+      manufacturerId: null,
+      carModelId: null,
+      generationId: null,
+      modificationId: null,
+    });
     router.push(pathname);
   };
 
@@ -195,126 +140,117 @@ export default function ListingFilters() {
         <CardTitle>Filter Listings</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="minPrice">Min Price</Label>
-            <Input
-              id="minPrice"
-              type="number"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              placeholder="Min price"
-            />
+        <form onSubmit={handleSubmit(onFind)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="minPrice">Min Price</Label>
+              <Input id="minPrice" type="number" {...register('minPrice')} placeholder="Min price" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="maxPrice">Max Price</Label>
+              <Input id="maxPrice" type="number" {...register('maxPrice')} placeholder="Max price" />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="maxPrice">Max Price</Label>
-            <Input
-              id="maxPrice"
-              type="number"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              placeholder="Max price"
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="minMileage">Min Mileage</Label>
+              <Input id="minMileage" type="number" {...register('minMileage')} placeholder="Min mileage" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="maxMileage">Max Mileage</Label>
+              <Input id="maxMileage" type="number" {...register('maxMileage')} placeholder="Max mileage" />
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="minMileage">Min Mileage</Label>
-            <Input
-              id="minMileage"
-              type="number"
-              value={minMileage}
-              onChange={(e) => setMinMileage(e.target.value)}
-              placeholder="Min mileage"
-            />
+            <Label>Manufacturer</Label>
+            <Select
+              value={watchedManufacturer?.toString() ?? undefined}
+              onValueChange={(val) => setValue('manufacturerId', val ? Number(val) : null)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select manufacturer" />
+              </SelectTrigger>
+              <SelectContent>
+                {manufacturers.map((m) => (
+                  <SelectItem key={m.id} value={m.id.toString()}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="maxMileage">Max Mileage</Label>
-            <Input
-              id="maxMileage"
-              type="number"
-              value={maxMileage}
-              onChange={(e) => setMaxMileage(e.target.value)}
-              placeholder="Max mileage"
-            />
+            <Label>Model</Label>
+            <Select
+              value={watchedModel?.toString() ?? undefined}
+              onValueChange={(val) => setValue('carModelId', val ? Number(val) : null)}
+              disabled={!watchedManufacturer || models.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select model" />
+              </SelectTrigger>
+              <SelectContent>
+                {models.map((m) => (
+                  <SelectItem key={m.id} value={m.id.toString()}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <Label>Manufacturer</Label>
-          <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select manufacturer" />
-            </SelectTrigger>
-            <SelectContent>
-              {manufacturers.map((manufacturer) => (
-                <SelectItem key={manufacturer.id} value={manufacturer.id.toString()}>
-                  {manufacturer.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label>Generation</Label>
+            <Select
+              value={watchedGeneration?.toString() ?? undefined}
+              onValueChange={(val) => setValue('generationId', val ? Number(val) : null)}
+              disabled={!watchedModel || generations.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select generation" />
+              </SelectTrigger>
+              <SelectContent>
+                {generations.map((g) => (
+                  <SelectItem key={g.id} value={g.id.toString()}>
+                    {g.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label>Model</Label>
-          <Select value={selectedModel} onValueChange={setSelectedModel} disabled={!selectedManufacturer}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select model" />
-            </SelectTrigger>
-            <SelectContent>
-              {models.map((model) => (
-                <SelectItem key={model.id} value={model.id.toString()}>
-                  {model.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="space-y-2">
+            <Label>Modification</Label>
+            <Select
+              value={getValues('modificationId')?.toString() ?? undefined}
+              onValueChange={(val) => setValue('modificationId', val ? Number(val) : null)}
+              disabled={!watchedGeneration || modifications.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select modification" />
+              </SelectTrigger>
+              <SelectContent>
+                {modifications.map((m) => (
+                  <SelectItem key={m.id} value={m.id.toString()}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-2">
-          <Label>Generation</Label>
-          <Select value={selectedGeneration} onValueChange={setSelectedGeneration} disabled={!selectedModel}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select generation" />
-            </SelectTrigger>
-            <SelectContent>
-              {generations.map((generation) => (
-                <SelectItem key={generation.id} value={generation.id.toString()}>
-                  {generation.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Modification</Label>
-          <Select value={selectedModification} onValueChange={setSelectedModification} disabled={!selectedGeneration}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select modification" />
-            </SelectTrigger>
-            <SelectContent>
-              {modifications.map((modification) => (
-                <SelectItem key={modification.id} value={modification.id.toString()}>
-                  {modification.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" onClick={handleClearFilters} className="w-full">
+            <Button type="button" variant="outline" onClick={handleClear} className="w-full">
               Clear
             </Button>
-            <Button onClick={handleApplyFilters} className="w-full">
-              Apply
+            <Button type="submit" className="w-full">
+              Find
             </Button>
           </div>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );

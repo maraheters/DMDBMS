@@ -15,10 +15,20 @@ type Filters = {
   maxMileage?: string | null;
 };
 
-export const getWithFilter = async (queryParams: URLSearchParams | Filters = {}): Promise<Listing[]> => {
-  const params: Filters =
-    queryParams instanceof URLSearchParams ? Object.fromEntries(queryParams.entries()) : queryParams;
+export const getWithFilter = async (
+  queryParams: URLSearchParams | Filters | [string, string][] = {},
+): Promise<Listing[]> => {
+  let params: Filters;
 
+  console.log(queryParams);
+
+  if (queryParams instanceof URLSearchParams) {
+    params = Object.fromEntries(queryParams.entries());
+  } else if (Array.isArray(queryParams)) {
+    params = Object.fromEntries(queryParams);
+  } else {
+    params = queryParams;
+  }
   const {
     manufacturerId,
     carModelId,
@@ -30,6 +40,8 @@ export const getWithFilter = async (queryParams: URLSearchParams | Filters = {})
     minMileage,
     maxMileage,
   } = params;
+
+  console.log('Parsed params object:', params);
 
   const { rows } = await db.query(`listing/get-filter.sql`, [
     manufacturerId ? parseInt(manufacturerId) : null, // $1
@@ -43,7 +55,22 @@ export const getWithFilter = async (queryParams: URLSearchParams | Filters = {})
     maxMileage ? parseFloat(maxMileage) : null, // $9
   ]);
 
+  console.log(rows);
+
   return rows;
 };
 
-export const create = async (...params: any): Promise<any> => {};
+export const create = async (listing: Listing): Promise<number> => {
+  const { rows } = await db.query('listing/create.sql', [
+    listing.titile,
+    listing.description,
+    listing.mileage,
+    listing.price,
+    listing.user_id,
+    listing.modification.id,
+    JSON.stringify(listing.images),
+    JSON.stringify(listing.documents),
+  ]);
+
+  return rows[0].id;
+};
