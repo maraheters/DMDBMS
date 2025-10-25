@@ -1,2 +1,3 @@
-SELECT * FROM car_model cm
-WHERE cm.manufacturer_id = $1
+SELECT * FROM car_model
+WHERE manufacturer_id = $1
+ORDER BY name;

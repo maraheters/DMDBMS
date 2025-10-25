@@ -1,1 +1,2 @@
-SELECT * FROM manufacturer m;
+SELECT * FROM manufacturer
+ORDER BY name;

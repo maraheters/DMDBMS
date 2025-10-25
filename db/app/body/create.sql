@@ -1,0 +1,3 @@
+INSERT INTO BODY(type) 
+VALUES ($1)
+RETURNING id;

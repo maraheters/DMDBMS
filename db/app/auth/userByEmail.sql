@@ -1,1 +1,2 @@
-SELECT id, email, password_hash, role_id FROM "USER" WHERE email = $1
+SELECT id, email, password_hash, role_id FROM "USER" 
+WHERE email = $1;

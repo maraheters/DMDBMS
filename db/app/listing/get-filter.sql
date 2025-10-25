@@ -58,7 +58,7 @@ LEFT JOIN
 LEFT JOIN
     engine AS E ON M.engine_id = E.id
 LEFT JOIN
-    transmission AS T ON M.transmission_id = T.id
+    transmission AS T ON M.id = T.modification_id
 LEFT JOIN
     body AS B ON M.body_id = B.id
 LEFT JOIN
@@ -94,5 +94,6 @@ AND
 AND
     -- Фильтр по максимальному пробегу
     (L.mileage <= $9 OR $9 IS NULL)
+ORDER BY L.created_at DESC
 GROUP BY
   L.id, M.id, B.id, G.id, CM.id, MF.id, E.id, T.id;

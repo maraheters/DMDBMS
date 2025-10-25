@@ -1,0 +1,2 @@
+SELECT * FROM BODY
+ORDER BY type;
