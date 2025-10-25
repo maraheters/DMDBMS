@@ -11,6 +11,6 @@ insert_images AS (
 insert_documents AS (
   INSERT INTO DOCUMENT (url, listing_id)
   SELECT d->>'url', (SELECT id FROM new_listing)
-  FROM jsonb_array_elements($8::jsonb) AS d
+  FROM jsonb_array_elements(coalesce($8::jsonb, '[]'::jsonb)) AS d
 )
 SELECT id FROM new_listing;

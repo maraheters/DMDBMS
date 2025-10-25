@@ -19,8 +19,8 @@ services:
     volumes:
       - minio_car_marketplace:/data
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     command: server --console-address ":9001" /data
 
   flyway_car_marketplace:

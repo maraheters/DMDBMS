@@ -30,7 +30,7 @@ export default function LoginPage() {
       <form action={formAction} className="p-8 bg-white shadow-md rounded-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Вход в аккаунт</h2>
 
-        {/* --- Поле Email --- */}
+        {/* --- Email --- */}
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email
@@ -44,7 +44,7 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* --- Поле Пароль --- */}
+        {/* --- Password --- */}
         <div className="mb-6">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700">
             Пароль
@@ -58,10 +58,10 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* --- Отображение ошибок --- */}
+        {/* --- Errors --- */}
         {state.error && <p className="text-red-500 text-sm text-center mb-4">{state.error}</p>}
 
-        {/* --- Кнопка отправки --- */}
+        {/* --- Submit --- */}
         <SubmitButton />
       </form>
     </div>

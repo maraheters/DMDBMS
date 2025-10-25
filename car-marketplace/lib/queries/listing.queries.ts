@@ -60,16 +60,43 @@ export const getWithFilter = async (
   return rows;
 };
 
-export const create = async (listing: Listing): Promise<number> => {
+interface CreateValues {
+  title: string;
+  description?: string;
+  mileage: number;
+  price: number;
+  userId: number;
+  modificationId: number;
+  images: {
+    url: string;
+    order: number;
+  }[];
+  documents?: {
+    url: string;
+  }[];
+}
+
+export const create = async ({
+  title,
+  description,
+  mileage,
+  price,
+  userId,
+  modificationId,
+  images,
+  documents,
+}: CreateValues): Promise<number> => {
+  if (!documents) documents = [];
+
   const { rows } = await db.query('listing/create.sql', [
-    listing.titile,
-    listing.description,
-    listing.mileage,
-    listing.price,
-    listing.user_id,
-    listing.modification.id,
-    JSON.stringify(listing.images),
-    JSON.stringify(listing.documents),
+    title,
+    description,
+    mileage,
+    price,
+    userId,
+    modificationId,
+    JSON.stringify(images),
+    JSON.stringify(documents),
   ]);
 
   return rows[0].id;
