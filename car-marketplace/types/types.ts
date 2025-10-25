@@ -1,3 +1,8 @@
+export interface Country {
+  id: number;
+  name: string;
+}
+
 export interface User {
   id: number;
   email: string;
@@ -17,6 +22,7 @@ export interface Transmission {
 
 export interface Engine {
   id: number;
+  name: string;
   type: string;
   configuration: string;
   power_kw: number;
