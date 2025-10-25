@@ -1,9 +1,9 @@
 'use client';
 
-import CarModelCreateForm from '@/components/CarModelCreateForm';
-import GenerationCreateForm from '@/components/GenerationCreateForm';
-import ManufacturerCreateForm from '@/components/ManufacturerCreateForm';
-import ModificationCreateForm from '@/components/ModificationCreateForm';
+import CarModelCreateForm from '@/components/forms/CarModelCreateForm';
+import GenerationCreateForm from '@/components/forms/GenerationCreateForm';
+import ManufacturerCreateForm from '@/components/forms/ManufacturerCreateForm';
+import ModificationCreateForm from '@/components/forms/ModificationCreateForm';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React, { useState } from 'react';
 

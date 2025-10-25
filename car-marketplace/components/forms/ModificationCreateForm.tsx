@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { CarModel, Generation, Manufacturer } from '@/types';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { getAll as getAllManufacturers } from '@/lib/queries/manufacturer.queries';
 import { getAllByManufacturer } from '@/lib/queries/car-model.queries';
 import { getAllByCarModel } from '@/lib/queries/generation.queries';
-import { FormInputField } from './FormInputField';
-import { FormSelectField } from './FormSelectField';
+import { FormInputField } from '../FormInputField';
+import { FormSelectField } from '../FormSelectField';
 
 export default function ModificationCreateForm() {
   const [error, setError] = useState<string>('');

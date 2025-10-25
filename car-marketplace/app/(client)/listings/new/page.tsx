@@ -1,6 +1,6 @@
 'use client';
 
-import CreateListingForm from '@/components/CreateListingForm';
+import CreateListingForm from '@/components/forms/CreateListingForm';
 
 function NewListingPage() {
   return (

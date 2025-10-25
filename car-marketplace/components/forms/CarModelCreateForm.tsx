@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Card, CardTitle, CardHeader, CardContent } from './ui/card';
+import { Card, CardTitle, CardHeader, CardContent } from '../ui/card';
 import { Manufacturer } from '@/types';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { getAll } from '@/lib/queries/manufacturer.queries';
-import { FormInputField } from './FormInputField';
-import { FormSelectField } from './FormSelectField';
+import { FormInputField } from '../FormInputField';
+import { FormSelectField } from '../FormSelectField';
 
 export default function CarModelCreateForm() {
   const [error, setError] = useState<string>('');

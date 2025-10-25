@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { FormInputField } from './FormInputField';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { FormInputField } from '../FormInputField';
 
 export default function ManufacturerCreateForm() {
   const [error, setError] = useState<string>('');
