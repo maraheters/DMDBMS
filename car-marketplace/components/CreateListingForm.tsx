@@ -15,7 +15,7 @@ import { getAllByCarModel as getGenerationsByModel } from '@/lib/queries/generat
 import { getAllByGeneration as getModificationsByGeneration } from '@/lib/queries/modification.queries';
 import { redirect } from 'next/navigation';
 import { CarModel, Generation, Manufacturer, Modification } from '@/types';
-import { submitListing } from '@/app/actions';
+import { submitListing } from '@/actions';
 
 const formSchema = z.object({
   title: z.string().min(1, { message: 'Title is required.' }),

@@ -1,11 +1,3 @@
-/*
-  This single file replaces both ListingsPage.tsx and ListingFilters.tsx.
-  You should place this at the correct route, e.g., 'app/listings/page.tsx'.
-  
-  You will also need to delete the old ListingFilters.tsx file 
-  and update imports for ListingCard if needed.
-*/
-
 'use client';
 
 import { useEffect, useState } from 'react';

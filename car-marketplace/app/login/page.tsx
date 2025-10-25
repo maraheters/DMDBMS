@@ -2,7 +2,7 @@
 
 import { useFormStatus } from 'react-dom';
 import { useActionState } from 'react';
-import { loginUser, LoginState } from '@/app/actions/auth.actions';
+import { loginUser, LoginState } from '@/actions/auth.actions';
 
 const initialState: LoginState = {
   error: undefined,
