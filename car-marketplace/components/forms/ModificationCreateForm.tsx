@@ -135,7 +135,7 @@ export default function ModificationCreateForm() {
         <CardTitle className="text-center">Modification Info</CardTitle>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSubmit}>
           <FormSelectField
             htmlFor="manufacturer"
             label="Manufacturer"

@@ -92,7 +92,7 @@ export default function GenerationCreateForm() {
         <CardTitle className="text-center">Generation Info</CardTitle>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSubmit}>
           <FormSelectField
             htmlFor="manufacturer"
             label="Manufacturer"

@@ -1,33 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { FormInputField } from '../FormInputField';
-import { FormSelectField } from '../FormSelectField';
-import { Country } from '@/types';
 
-export default function ManufacturerCreateForm() {
+export default function CountryCreateForm() {
   const [error, setError] = useState<string>('');
   const [name, setName] = useState<string>('');
-  const [countries, setCountries] = useState<Country[]>([]);
-  const [countryId, setCountryId] = useState<number | null>(null);
-
-  useEffect(() => {
-    // Fetch countries from the API
-    const fetchCountries = async () => {
-      try {
-        const response = await getAllCountries();
-        setCountries(response);
-      } catch (err) {
-        setError('Failed to fetch manufacturers.');
-      }
-    };
-
-    fetchCountries();
-  }, []);
 
   const setDefaultStates = () => {
     setName('');
-    setCountryId(null);
     setError('');
   };
 
@@ -36,14 +17,13 @@ export default function ManufacturerCreateForm() {
 
     const trimmedName = name.trim();
 
-    if (!trimmedName || !countryId) {
-      setError('Name and country are required.');
+    if (!trimmedName) {
+      setError('Name is required.');
       return;
     }
 
     const request = {
       name: trimmedName,
-      country: countryId,
     };
 
     try {
@@ -62,23 +42,16 @@ export default function ManufacturerCreateForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
-          <FormSelectField
-            htmlFor="country"
-            placeholder="Manufacturer country..."
-            options={countries}
-            onValueChange={(value) => setCountryId(Number(value))}
-            label="Country"
-            required
-          />
           <FormInputField
             id="name"
             type="text"
-            placeholder="Model name..."
+            placeholder="Country name..."
             value={name}
             onChange={(e) => setName(e.target.value)}
             label="Name"
             required
           />
+
           <Button type="submit" className="w-full mt-5">
             Submit
           </Button>

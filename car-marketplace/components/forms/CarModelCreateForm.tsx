@@ -62,7 +62,7 @@ export default function CarModelCreateForm() {
         <CardTitle className="text-center">Car Model Info</CardTitle>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={handleSubmit}>
           <FormSelectField
             htmlFor="manufacturer"
             label="Manufacturer"
