@@ -51,10 +51,17 @@ CREATE TABLE MODIFICATION (
     name VARCHAR(255) NOT NULL,
     generation_id INT,
     engine_id INT,
-    transmission_id INT,
     body_id INT,
     FOREIGN KEY (generation_id) REFERENCES GENERATION(id),
     FOREIGN KEY (engine_id) REFERENCES ENGINE(id),
-    FOREIGN KEY (transmission_id) REFERENCES TRANSMISSION(id),
     FOREIGN KEY (body_id) REFERENCES BODY(id)
+);
+
+-- Таблица трансмиссий (TRANSMISSION)
+CREATE TABLE TRANSMISSION (
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(255) NOT NULL,
+    gears_num INT CHECK (gears_num > 0),
+    modification_id INT NOT NULL UNIQUE,
+    FOREIGN KEY (modification_id) REFERENCES MODIFICATION(id)
 );

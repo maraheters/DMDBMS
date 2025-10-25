@@ -13,6 +13,7 @@ CREATE TABLE COUNTRY (
 -- Таблица двигателей (ENGINE)
 CREATE TABLE ENGINE (
     id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
     type VARCHAR(255) NOT NULL,
     configuration VARCHAR(255),
     power_kw INT CHECK (power_kw > 0),
@@ -20,15 +21,8 @@ CREATE TABLE ENGINE (
     displacement DECIMAL(3, 1) CHECK (displacement > 0)
 );
 
--- Таблица трансмиссий (TRANSMISSION)
-CREATE TABLE TRANSMISSION (
-    id SERIAL PRIMARY KEY,
-    type VARCHAR(255) NOT NULL,
-    gears_num INT CHECK (gears_num > 0)
-);
-
 -- Таблица типов кузова (BODY)
 CREATE TABLE BODY (
     id SERIAL PRIMARY KEY,
-    type VARCHAR(255) NOT NULL
+    type VARCHAR(255) NOT NULL UNIQUE
 );
