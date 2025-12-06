@@ -1,6 +1,7 @@
 'use client';
 
 import CarModelCreateForm from '@/components/forms/CarModelCreateForm';
+import CountryCreateForm from '@/components/forms/CountryCreateForm';
 import GenerationCreateForm from '@/components/forms/GenerationCreateForm';
 import ManufacturerCreateForm from '@/components/forms/ManufacturerCreateForm';
 import ModificationCreateForm from '@/components/forms/ModificationCreateForm';
@@ -8,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React, { useState } from 'react';
 
 export default function CatalogDashboard() {
-  type EntityType = 'manufacturer' | 'model' | 'generation' | 'modification';
+  type EntityType = 'country' | 'manufacturer' | 'model' | 'generation' | 'modification';
 
   const [entityType, setEntityType] = useState<EntityType>('manufacturer');
   const [currentForm, setCurrentForm] = useState<React.ReactNode>(<ManufacturerCreateForm />);
@@ -17,6 +18,9 @@ export default function CatalogDashboard() {
     setEntityType(type);
 
     switch (type) {
+      case 'country':
+        setCurrentForm(<CountryCreateForm />);
+        break;
       case 'manufacturer':
         setCurrentForm(<ManufacturerCreateForm />);
         break;
@@ -37,6 +41,7 @@ export default function CatalogDashboard() {
       <div className="w-full max-w-2xl">
         <Tabs value={entityType} onValueChange={(val) => handleEntityTypeChanged(val as EntityType)}>
           <TabsList className="flex justify-center items-center w-full">
+            <TabsTrigger value="country">Country</TabsTrigger>
             <TabsTrigger value="manufacturer">Manufacturer</TabsTrigger>
             <TabsTrigger value="model">Model</TabsTrigger>
             <TabsTrigger value="generation">Generation</TabsTrigger>

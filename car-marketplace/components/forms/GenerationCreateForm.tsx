@@ -6,6 +6,7 @@ import { getAll as getAllManufacturers } from '@/lib/queries/manufacturer.querie
 import { getAllByManufacturer } from '@/lib/queries/car-model.queries';
 import { FormSelectField } from '../FormSelectField';
 import { FormInputField } from '../FormInputField';
+import { create } from '@/lib/queries/generation.queries';
 
 export default function GenerationCreateForm() {
   const [error, setError] = useState<string>('');
@@ -71,14 +72,8 @@ export default function GenerationCreateForm() {
       return;
     }
 
-    const request = {
-      name: trimmedName,
-      carModelId: carModelId,
-      startYear: Number(startYear),
-    };
-
     try {
-      await create(request);
+      await create(trimmedName, Number(startYear), carModelId);
       setDefaultStates();
     } catch (err) {
       setError('Failed to create generation.');

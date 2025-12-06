@@ -1,6 +1,7 @@
 import { Listing } from '@/types';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { redirect } from 'next/navigation';
+import { getImageUrl } from '@/lib/utils';
 
 export default function ListingCard({ listing }: { listing: Listing }) {
   const handleClick = () => {
@@ -16,7 +17,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       <div className="flex flex-row w-full">
         <div className="w-96 h-72 overflow-hidden rounded-md">
           <img
-            src={listing.images?.sort((a, b) => a.order - b.order)[0].url || '/placeholder-car.jpg'}
+            src={getImageUrl(listing.images?.sort((a, b) => a.order - b.order)[0]?.url)}
             alt={`${listing.modification?.manufacturer.name} ${listing.modification?.car_model.name}`}
             className="w-full h-full object-cover"
           />

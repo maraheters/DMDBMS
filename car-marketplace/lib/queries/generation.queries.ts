@@ -4,7 +4,7 @@ import { Generation } from '@/types';
 import { db } from '../db';
 
 export const create = async (name: string, startYear: number, carModelId: number): Promise<string> => {
-  const { rows } = await db.query(`generation/create.sql`, [carModelId]);
+  const { rows } = await db.query(`generation/create.sql`, [name, startYear, carModelId]);
 
   console.log(rows);
 

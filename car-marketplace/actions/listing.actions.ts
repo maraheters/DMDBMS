@@ -3,35 +3,24 @@
 import { minio } from '@/lib/minio';
 import { create } from '@/lib/queries/listing.queries';
 
-interface Values {
-  title: string;
-  modelId: number;
-  modificationId: number;
-  price: number;
-  mileage: number;
-  images: File[];
-  description?: string;
-  documents?: File[];
-}
+export const submitListing = async (formData: FormData) => {
+  const title = formData.get('title') as string;
+  const modificationId = Number(formData.get('modificationId'));
+  const price = Number(formData.get('price'));
+  const mileage = Number(formData.get('mileage'));
+  const description = formData.get('description') as string | null;
 
-export const submitListing = async ({
-  title,
-  modelId,
-  modificationId,
-  price,
-  mileage,
-  images,
-  description,
-  documents,
-}: Values) => {
+  const images = formData.getAll('images') as File[];
+  const documents = formData.getAll('documents') as File[];
+
   if (images.length === 0) throw new Error('Must provide at least 1 image');
 
   const imageUrls = await minio.uploadImages(images);
-  const docUrls = documents ? await minio.uploadDocuments(documents) : [];
+  const docUrls = documents.length > 0 ? await minio.uploadDocuments(documents) : [];
 
   const listing = {
     title,
-    description,
+    description: description ?? undefined,
     mileage,
     price,
     userId: 1,

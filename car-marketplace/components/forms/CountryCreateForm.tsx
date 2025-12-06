@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { FormInputField } from '../FormInputField';
+import { create } from '@/lib/queries/country.queries';
 
 export default function CountryCreateForm() {
   const [error, setError] = useState<string>('');
@@ -22,12 +23,8 @@ export default function CountryCreateForm() {
       return;
     }
 
-    const request = {
-      name: trimmedName,
-    };
-
     try {
-      await create(request);
+      await create(trimmedName);
       setDefaultStates();
     } catch (err) {
       setError('Failed to create manufacturer.');

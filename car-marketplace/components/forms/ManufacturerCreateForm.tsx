@@ -4,6 +4,8 @@ import { Button } from '../ui/button';
 import { FormInputField } from '../FormInputField';
 import { FormSelectField } from '../FormSelectField';
 import { Country } from '@/types';
+import { getAll as getAllCountries } from '@/lib/queries/country.queries';
+import { create } from '@/lib/queries/manufacturer.queries';
 
 export default function ManufacturerCreateForm() {
   const [error, setError] = useState<string>('');
@@ -41,13 +43,8 @@ export default function ManufacturerCreateForm() {
       return;
     }
 
-    const request = {
-      name: trimmedName,
-      country: countryId,
-    };
-
     try {
-      await create(request);
+      await create(trimmedName, countryId);
       setDefaultStates();
     } catch (err) {
       setError('Failed to create manufacturer.');

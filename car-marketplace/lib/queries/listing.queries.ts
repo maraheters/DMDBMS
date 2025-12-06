@@ -90,7 +90,7 @@ export const create = async ({
 
   const { rows } = await db.query('listing/create.sql', [
     title,
-    description,
+    description || null,
     mileage,
     price,
     userId,
@@ -100,4 +100,9 @@ export const create = async ({
   ]);
 
   return rows[0].id;
+};
+
+export const getById = async (id: number): Promise<Listing | null> => {
+  const { rows } = await db.query('listing/get-by-id.sql', [id]);
+  return rows[0] || null;
 };

@@ -13,9 +13,9 @@ import { getAll as getAllManufacturers } from '@/lib/queries/manufacturer.querie
 import { getAllByManufacturer as getModelsByManufacturer } from '@/lib/queries/car-model.queries';
 import { getAllByCarModel as getGenerationsByModel } from '@/lib/queries/generation.queries';
 import { getAllByGeneration as getModificationsByGeneration } from '@/lib/queries/modification.queries';
-import { redirect } from 'next/navigation';
 import { CarModel, Generation, Manufacturer, Modification } from '@/types';
 import { submitListing } from '@/actions';
+import { title } from 'process';
 
 const formSchema = z.object({
   title: z.string().min(1, { message: 'Title is required.' }),
@@ -45,7 +45,7 @@ export default function CreateListingForm() {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [modifications, setModifications] = useState<Modification[]>([]);
 
-  const form = useForm<Partial<FormValues>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       title: '',
@@ -139,20 +139,6 @@ export default function CreateListingForm() {
     fetchModifications();
   }, [generationId]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Revoke old previews to prevent memory leaks
-    imagePreviews.forEach(URL.revokeObjectURL);
-
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      form.setValue('images', files as any, { shouldValidate: true });
-      setImagePreviews(files.map((file) => URL.createObjectURL(file)));
-    } else {
-      form.setValue('images', [] as any, { shouldValidate: true });
-      setImagePreviews([]);
-    }
-  };
-
   const removeImage = (index: number) => {
     const currentImages = (form.getValues('images') || []) as File[];
     const newImages = [...currentImages];
@@ -174,40 +160,37 @@ export default function CreateListingForm() {
     [imagePreviews],
   );
 
-  const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      form.setValue('documents', files as any, { shouldValidate: true });
-      setDocumentNames(files.map((f) => f.name));
-    } else {
-      form.setValue('documents', [] as any);
-      setDocumentNames([]);
-    }
-  };
-
-  const onSubmit: SubmitHandler<Partial<FormValues>> = async (values) => {
+  const onSubmit: SubmitHandler<FormValues> = async (values) => {
     setApiError('');
 
-    if (
-      !values.title ||
-      !values.modificationId ||
-      typeof values.price !== 'number' ||
-      typeof values.mileage !== 'number' ||
-      !values.images ||
-      values.images.length === 0
-    ) {
-      setApiError('Please fill all required fields correctly.');
-      return;
+    const formData = new FormData();
+
+    formData.append('title', values.title);
+    formData.append('modificationId', values.modificationId.toString());
+    formData.append('price', values.price.toString());
+    formData.append('mileage', values.mileage.toString());
+
+    if (values.description) {
+      formData.append('description', values.description);
+    }
+
+    values.images.forEach((file) => {
+      formData.append('images', file);
+    });
+
+    if (values.documents) {
+      values.documents.forEach((file) => {
+        formData.append('documents', file);
+      });
     }
 
     try {
-      await submitListing(values as any);
+      console.log(formData.get('title'));
+      await submitListing(formData);
     } catch (err) {
       console.error(err);
       setApiError('Failed to create listing.');
     }
-
-    if (apiError === '') redirect('/listings');
   };
 
   const { isSubmitting } = form.formState;
@@ -422,7 +405,7 @@ export default function CreateListingForm() {
             <FormField
               control={form.control as any}
               name="images"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Images</FormLabel>
                   <FormControl>
@@ -431,9 +414,21 @@ export default function CreateListingForm() {
                       type="file"
                       multiple
                       accept="image/*"
-                      onChange={handleImageChange}
-                      className="mb-2"
                       disabled={isSubmitting}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      onChange={(e) => {
+                        imagePreviews.forEach(URL.revokeObjectURL);
+
+                        if (e.target.files) {
+                          const files = Array.from(e.target.files);
+                          field.onChange(files);
+                          setImagePreviews(files.map((file) => URL.createObjectURL(file)));
+                        } else {
+                          field.onChange([]);
+                          setImagePreviews([]);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -464,7 +459,7 @@ export default function CreateListingForm() {
             <FormField
               control={form.control as any}
               name="documents"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Documents</FormLabel>
                   <FormControl>
@@ -472,8 +467,19 @@ export default function CreateListingForm() {
                       type="file"
                       multiple
                       accept="application/pdf,application/msword"
-                      onChange={handleDocumentChange}
                       disabled={isSubmitting}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          const files = Array.from(e.target.files);
+                          field.onChange(files);
+                          setDocumentNames(files.map((f) => f.name));
+                        } else {
+                          field.onChange([]);
+                          setDocumentNames([]);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

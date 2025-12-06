@@ -7,6 +7,7 @@ import { getAllByManufacturer } from '@/lib/queries/car-model.queries';
 import { getAllByCarModel } from '@/lib/queries/generation.queries';
 import { FormInputField } from '../FormInputField';
 import { FormSelectField } from '../FormSelectField';
+import { create } from '@/lib/queries/modification.queries';
 
 export default function ModificationCreateForm() {
   const [error, setError] = useState<string>('');
@@ -104,19 +105,14 @@ export default function ModificationCreateForm() {
       return;
     }
 
-    const request: ModificationCreateRequest = {
+    const request = {
       name: name.trim(),
       generationId,
-      drivetrain: { type: drivetrain.trim() },
-      engine: {
-        type: engineType.trim(),
-        fuelType: fuelType.trim(),
-        horsepower: Number(horsepower),
-        torque: Number(torque),
-      },
+      engineId,
+      bodyId,
       transmission: {
         type: transmissionType.trim(),
-        numberOfGears: Number(numberOfGears),
+        gearsNum: Number(numberOfGears),
       },
     };
 
@@ -170,15 +166,6 @@ export default function ModificationCreateForm() {
             placeholder="Enter modification name..."
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <FormInputField
-            id="drivetrain"
-            label="Drivetrain"
-            type="text"
-            placeholder="Enter drivetrain type..."
-            value={drivetrain}
-            onChange={(e) => setDrivetrain(e.target.value)}
             required
           />
           <FormInputField

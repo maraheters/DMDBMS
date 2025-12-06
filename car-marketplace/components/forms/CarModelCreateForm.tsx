@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { getAll } from '@/lib/queries/manufacturer.queries';
 import { FormInputField } from '../FormInputField';
 import { FormSelectField } from '../FormSelectField';
+import { create } from '@/lib/queries/car-model.queries';
 
 export default function CarModelCreateForm() {
   const [error, setError] = useState<string>('');
@@ -42,13 +43,8 @@ export default function CarModelCreateForm() {
       return;
     }
 
-    const request = {
-      name: trimmedName,
-      manufacturerId: trimmedId,
-    };
-
     try {
-      await create(request);
+      await create(trimmedName, manufacturerId);
       setDefaultStates();
     } catch (err) {
       setError('Failed to create car model.');

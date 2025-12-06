@@ -55,11 +55,12 @@ export interface Modification {
 
 export interface Listing {
   id: number;
-  titile: string;
+  title: string;
   description: string;
   mileage: number;
   price: number;
   user_id: number;
+  created_at: Date;
   modification: Modification;
   images: ListingImage[];
   documents?: Document[];

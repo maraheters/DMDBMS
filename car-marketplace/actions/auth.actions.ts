@@ -114,3 +114,8 @@ export async function loginUser(prevState: LoginState, formData: FormData): Prom
     redirect('/');
   }
 }
+
+export async function logoutUser() {
+  (await cookies()).delete('session');
+  redirect('/login');
+}
