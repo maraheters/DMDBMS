@@ -39,20 +39,35 @@ SELECT
             'name', MF.name
         )
     ) AS modification,
-    COALESCE(
-        jsonb_agg(
-            jsonb_build_object(
-                'id', I.id,
-                'url', I.url,
-                'order', I.order
-            )
-        ) FILTER (WHERE I.id IS NOT NULL),
-    '[]'::jsonb
-  ) AS images
+    (
+        SELECT COALESCE(
+            jsonb_agg(
+                jsonb_build_object(
+                    'id', I.id,
+                    'url', I.url,
+                    'order', I.order
+                ) ORDER BY I.order ASC
+            ),
+            '[]'::jsonb
+        )
+        FROM image I
+        WHERE I.listing_id = L.id
+    ) AS images,
+    (
+        SELECT COALESCE(
+            jsonb_agg(
+                jsonb_build_object(
+                    'id', D.id,
+                    'url', D.url
+                )
+            ),
+            '[]'::jsonb
+        )
+        FROM document D
+        WHERE D.listing_id = L.id
+    ) AS documents
 FROM
     listing AS L
-LEFT JOIN
-    image AS I ON L.id = I.listing_id
 LEFT JOIN
     modification AS M ON L.modification_id = M.id
 LEFT JOIN
@@ -68,32 +83,5 @@ LEFT JOIN
 LEFT JOIN
     manufacturer AS MF ON CM.manufacturer_id = MF.id
 WHERE
-    -- Фильтр по производителю
-    (MF.id = $1 OR $1 IS NULL)
-AND
-    -- Фильтр по модели
-    (CM.id = $2 OR $2 IS NULL)
-AND
-    -- Фильтр по поколению
-    (G.id = $3 OR $3 IS NULL)
-AND
-    -- Фильтр по модификации
-    (M.id = $4 OR $4 IS NULL)
-AND
-    -- Фильтр по типу кузова
-    (B.id = $5 OR $5 IS NULL)
-AND
-    -- Фильтр по минимальной цене
-    (L.price >= $6 OR $6 IS NULL)
-AND
-    -- Фильтр по максимальной цене
-    (L.price <= $7 OR $7 IS NULL)
-AND
-    -- Фильтр по минимальному пробегу
-    (L.mileage >= $8 OR $8 IS NULL)
-AND
-    -- Фильтр по максимальному пробегу
-    (L.mileage <= $9 OR $9 IS NULL)
-GROUP BY
-  L.id, M.id, B.id, G.id, CM.id, MF.id, E.id, T.id
-ORDER BY L.created_at DESC;
+    L.id = $1;
+

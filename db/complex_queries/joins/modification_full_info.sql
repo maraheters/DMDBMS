@@ -37,8 +37,8 @@ LEFT JOIN
 LEFT JOIN
     ENGINE AS E ON M.engine_id = E.id
 LEFT JOIN
-    TRANSMISSION AS T ON M.transmission_id = T.id
+    TRANSMISSION AS T ON t.modification_id = m.id
 LEFT JOIN
     BODY AS B ON M.body_id = B.id
 WHERE
-    M.id = :id;
+    M.id = $1;

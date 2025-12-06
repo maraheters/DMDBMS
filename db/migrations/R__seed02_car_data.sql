@@ -121,3 +121,12 @@ INSERT INTO TRANSMISSION (id, type, gears_num, modification_id) VALUES
 (9, 'Automatic', 8, 9), -- Lineartronic (CVT c 8 "передачами")
 (10, 'Automatic', 8, 10) -- Tiptronic
 ON CONFLICT (id) DO NOTHING;
+
+SELECT setval('country_id_seq', (SELECT MAX(id) FROM country));                                                
+SELECT setval('body_id_seq', (SELECT MAX(id) FROM body));                                                
+SELECT setval('manufacturer_id_seq', (SELECT MAX(id) FROM manufacturer));                                      
+SELECT setval('engine_id_seq', (SELECT MAX(id) FROM engine));                                              
+SELECT setval('car_model_id_seq', (SELECT MAX(id) FROM car_model));                                           
+SELECT setval('generation_id_seq', (SELECT MAX(id) FROM generation));                                        
+SELECT setval('modification_id_seq', (SELECT MAX(id) FROM modification));                                      
+SELECT setval('transmission_id_seq', (SELECT MAX(id) FROM transmission));  
